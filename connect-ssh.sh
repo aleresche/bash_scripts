@@ -1,30 +1,30 @@
-
 #!/bin/bash
-# Connect SSH with specifying Color Scheme 
-
-#  Features:
-#  -------
-#  Connect to a Specified remote Server from Old Neva using SSH client
-#  use usual pwd to allow gain time
-# # 
-
-#  Usage:
-#  -------
-#  ./connect-ssh.sh <IP OF SERVER>
 #
-#  Example:
-#  ---------
-#  ./connect-ssh.sh syssupale@10.1.1.108
-# # 
+# Description
+# -----------
+# Bash Script to transfer custom bashrc to remote server, to force specific color/scheme for the shell
+##
 
-#  Parameters:
-#  -----------
-#  user@remote eg: syssupale@10.1.1.108
-# #
+# Example
+# -------
+# ./connect-ssh.sh username@remoteserver
+##
+
+#Parameters 
 ConnectSSH=$1
 
-scp -o "StrictHostKeyChecking no" /home/aleresche/bashrc_remote $ConnectSSH:/home/syssupale
-ssh -o "StrictHostKeyChecking no" $ConnectSSH 'source /home/syssupale/bashrc_remote'' 
+#Retrieve IP from param
+IP=$(echo $ConnectSSH | cut -f2 -d"@")
+
+#Connection
+if ssh-keygen -q -F "$IP" # test if IP is already present in known host (if so we already connected once and the bashrc file il already uploaded)
+then
+	ssh -o "StrictHostKeyChecking no" $ConnectSSH -t 'source ~/.bashrc;bash -l' 
+else 
+	scp -o "StrictHostKeyChecking no" /home/aleresche/bashrc_remote $ConnectSSH:/home/syssupale/
+	ssh -o "StrictHostKeyChecking no" $ConnectSSH -t 'mv ~/bashrc_remote ~/.bashrc;source ~/.bashrc;bash -l'
+fi
+
 
 
 
