@@ -37,8 +37,8 @@ Yellow='\033[0;33m'
 EndColor='\033[0m\n'
 
 #Source login (need to find a better way to store it)
-LOGIN="biadm"
-PWD="Smb12@bi"
+LOGIN="xxx"
+PWD="xxx"
 
 ##########################################################################################################################################
 #  Interactive Menu
