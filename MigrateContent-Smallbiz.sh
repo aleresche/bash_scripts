@@ -26,6 +26,7 @@ DestinationIP=$2
 DomainName=$3
 Database=$4
 
+
 #Color Code
 Cyan='\033[0;35m'
 Yellow='\033[0;33m'
@@ -73,7 +74,7 @@ function bckupWebContent {
 	printf "${Cyan}Connecting to Source Server....${EndColor}"
 	#Retrieving web content
 	ssh -p 2202 $login@$SRV -p$PWD "tar -zcvf  /var/www/vhosts/$WebsiteName" > $WebsiteName.content.tar.gz
-	echo "${Cyan}content locally copied to $pwd${EndColor}"
+	printf "${Cyan}content locally copied to $pwd${EndColor}"
 }
 
 ##########################################################################################################################################
@@ -85,7 +86,7 @@ function bckupDBContent {
 
 	#mysql db & user installation/configuration
 	ssh -p 2202 $login@$SRV "mysqldump -uadmin -p`cat /etc/psa/.psa.shadow` $DBName  | gzip" > ./$DBName.sql.gz
-	echo "${Cyan}Database has been copied to $pwd${EndColor}"
+	printf "${Cyan}Database has been copied to $pwd${EndColor}"
 }
 
 ##########################################################################################################################################
@@ -98,7 +99,7 @@ function UploadContent {
 	ContentPath=./$DomainName.content.tar.gz
 	#uses SSH access from syssupale (public on remote, private on local)
 	scp -P 2202 -o "StrictHostKeyChecking no" $DBPath $DestSRV:/home/syssupale
-	echo "${Cyan}Database has been uploaded...${EndColor}"
+	printf "${Cyan}Database has been uploaded...${EndColor}"
 	scp -P 2202 -o "StrictHostKeyChecking no" $ContentPath $DestSRV:/home/syssupale
-	echo "${Cyan}Web Content has been uploaded...${EndColor}"
+	printf "${Cyan}Web Content has been uploaded...${EndColor}"
 }
