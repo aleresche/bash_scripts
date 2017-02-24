@@ -3,7 +3,7 @@
 # Description
 # -----------
 # connect to the old server, excract and compress content, retrieve it Locally, upload and uncompress on source
-# this script will be used/tested from WSL Bash
+# this script will be used/tested from WSL Bash, all managed through an interactive menu
 # ./MigrateContent-Smallbiz.sh <SourceIP> <DestinationIP> <domainName> <Database Name>
 ##
 
@@ -15,7 +15,7 @@
 # Misc
 # -------
 # Author	:	Arnaud Leresche
-# Version	:	0.2
+# Version	:	0.3.1
 ##
 ##########################################################################################################################################
 #  Variables
@@ -32,13 +32,14 @@ Yellow='\033[0;33m'
 EndColor='\033[0m\n'
 
 #Source login (need to find a better way to store it)
-LOGIN="xxx"
-PWD="xxx"
+LOGIN="biadm"
+PWD="Smb12@bi"
 
 ##########################################################################################################################################
 #  Interactive Menu
 ##########################################################################################################################################
-title="===== Migrate Content Tool Smallbiz ====="
+title="===== Migrate Content Tool Smallbiz =====\n========================================="
+	   
 prompt="Pick an option:"
 options=("Backup Website Content" "Backup Website Database" "Transfert Content")
 
@@ -48,9 +49,9 @@ select opt in "${options[@]}" "Quit"; do
 
     case "$REPLY" in
 
-    1 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";bckupWebContent($SourceIP,$DomainName);;
-    2 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";bckupDBContent($SourceIP,$Database);;
-	3 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";UploadContent($DestinationIP,$DomainName);;
+    1 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";bckupWebContent $SourceIP $DomainName;;
+    2 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";bckupDBContent $SourceIP $Database;;
+	3 ) printf "${Cyan}You picked $opt which is option $REPLY${EndColor}";UploadContent $DestinationIP $DomainName;;
 
     $(( ${#options[@]}+1 )) ) printf "${Cyan}Goodbye!${EndColor}"; break;;
     *) printf "${Cyan}Invalid option. Try another one.${EndColor}";continue;;
@@ -71,7 +72,7 @@ function bckupWebContent {
 	#SOURCE SERVER
 	printf "${Cyan}Connecting to Source Server....${EndColor}"
 	#Retrieving web content
-	ssh $login@$SRV -p$PWD "tar -zcvf  /var/www/vhosts/$WebsiteName" > $WebsiteName.content.tar.gz
+	ssh -p 2202 $login@$SRV -p$PWD "tar -zcvf  /var/www/vhosts/$WebsiteName" > $WebsiteName.content.tar.gz
 	echo "${Cyan}content locally copied to $pwd${EndColor}"
 }
 
@@ -83,7 +84,7 @@ function bckupDBContent {
 	DBName=$2
 
 	#mysql db & user installation/configuration
-	ssh $login@$SRV "mysqldump -uadmin -p`cat /etc/psa/.psa.shadow` $DBName  | gzip" > ./$DBName.sql.gz
+	ssh -p 2202 $login@$SRV "mysqldump -uadmin -p`cat /etc/psa/.psa.shadow` $DBName  | gzip" > ./$DBName.sql.gz
 	echo "${Cyan}Database has been copied to $pwd${EndColor}"
 }
 
@@ -96,8 +97,8 @@ function UploadContent {
 	DBPath=./$Database.sql.gz 
 	ContentPath=./$DomainName.content.tar.gz
 	#uses SSH access from syssupale (public on remote, private on local)
-	scp -o "StrictHostKeyChecking no" $DBPath $DestSRV:/home/syssupale
+	scp -P 2202 -o "StrictHostKeyChecking no" $DBPath $DestSRV:/home/syssupale
 	echo "${Cyan}Database has been uploaded...${EndColor}"
-	scp -o "StrictHostKeyChecking no" $ContentPath $DestSRV:/home/syssupale
+	scp -P 2202 -o "StrictHostKeyChecking no" $ContentPath $DestSRV:/home/syssupale
 	echo "${Cyan}Web Content has been uploaded...${EndColor}"
 }
