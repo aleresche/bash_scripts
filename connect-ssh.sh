@@ -16,6 +16,10 @@ ConnectSSH=$1
 #Retrieve IP from param
 IP=$(echo $ConnectSSH | cut -f2 -d"@")
 
+if [[ $ConnectSSH == *"biadm"* ]]; then
+  echo "biadm login detected..."
+fi
+
 #Connection
 if ssh-keygen -q -F "$IP" # test if IP is already present in known host (if so we already connected once and the bashrc file il already uploaded)
 then
