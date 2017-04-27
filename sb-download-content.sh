@@ -39,12 +39,25 @@ EndColor='\033[0m\n'
 #  MAIN CODE
 ##########################################################################################################################################
 ## SOURCE SERVER
-printf "${Yellow}Connecting to Source Server and downloading content...${EndColor}"
+printf "${Cyan}Connecting to Source Server and downloading content...${EndColor}"
 ## Retrieving web content
 ssh $login@$SRV -p 2202  "tar -zcvf  /var/www/vhosts/$WebsiteName" > $WebsiteName.content.tar.gz
-printf "content locally copied to $pwd"
-## Retrieving Database content
-printf "starting Database dump..."
+if [ $? -eq 0 ]; then
+    printf "${Cyan}Web content has been backed up to $WebsiteName.content.tar.gz${EndColor}"
+else
+    printf "${Yellow}An error Occuered while accessing the server, please check SSH login/pwd and IP address and make sure those are correct and suffisent${EndColor}"
+    exit
+fi
+printf "${Cyan}content locally copied to $pwd${EndColor}"
+## Create full backup of database
+printf "${Cyan}starting Database dump...${EndColor}"
 ssh $login@$SRV -p 2202  "mysqldump -u -p $dbname | gzip $dbname.gz"
-printf "dump created downloading content..."
-scp -P 2202 $login@$SRV:~/\{$dbname.gz} .
+if [ $? -eq 0 ]; then
+    ## Retrieving backup locally 
+    printf "${Cyan}dump created, downloading content...${EndColor}"
+    scp -P 2202 $login@$SRV:~/\{$dbname.gz} .
+else
+    printf "${Yellow}An error Occuered while creating the sql dump, please check SSH & MySQL login/pwd and IP address and make sure those are correct and suffisent${EndColor}"
+    exit
+fi
+
